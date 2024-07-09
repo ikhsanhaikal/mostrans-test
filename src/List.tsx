@@ -1,7 +1,8 @@
 import { gql, useQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
-import { Stack } from "react-bootstrap";
+import { Container, Row } from "react-bootstrap";
 import Pagination from "react-bootstrap/Pagination";
+import CardCharacter from "./CardCharacter";
 
 const GET_CHARACTERS = gql`
   query ($page: Int) {
@@ -15,6 +16,7 @@ const GET_CHARACTERS = gql`
         id
         name
         species
+        type
         gender
         image
       }
@@ -50,24 +52,18 @@ function List() {
     return <>loading...</>;
   }
 
-  // console.log("data: ", data);
-
-  // console.log("characters: ", data.characters.results);
   return (
-    <Stack className="m-4">
-      <h1>List page</h1>
-      <ul>
-        {data.characters.results
-          .filter((el) => el.id > page * 20 - 20 && el.id <= page * 20)
-          .map((c) => {
-            return <li key={c.id}>{c.name}</li>;
-          })}
-        {/* {data.characters.results.slice(page * 20 - 20, page * 20).map((c) => {
-          return <li key={c.id}>{c.name}</li>;
-        })} */}
-      </ul>
-      <Pagination>
-        {/* {page > 1 ? (
+    <div className="d-flex justify-content-center">
+      <Container className="m-4">
+        <Row className="">
+          {data.characters.results
+            .filter((el) => el.id > page * 20 - 20 && el.id <= page * 20)
+            .map((character) => {
+              return <CardCharacter character={character} />;
+            })}
+        </Row>
+        <Pagination>
+          {/* {page > 1 ? (
           <Pagination.Prev
             onClick={() => {
               if (page === leftiesPage) {
@@ -78,38 +74,39 @@ function List() {
           />
         ) : null} */}
 
-        {Array.from(Array(8).values()).map((_, idx) => {
-          const currPage = idx + base;
-          if (currPage > 42) {
-            return null;
-          }
-          return (
-            <Pagination.Item
-              key={idx}
-              onClick={() => {
-                setPage(currPage);
-                if (idx === 7) {
-                  setLeftiesPage(base + 4);
-                  setRightiesPage(base + 4 + idx);
-                  setBase(base + 4);
-                } else if (idx === 0 && currPage !== 1) {
-                  setLeftiesPage(base - 4);
-                  setRightiesPage(base - 4 + idx);
-                  setBase(base - 4);
-                }
-              }}
-              active={page === currPage}
-            >
-              {currPage}
-            </Pagination.Item>
-          );
-        })}
+          {Array.from(Array(8).values()).map((_, idx) => {
+            const currPage = idx + base;
+            if (currPage > 42) {
+              return null;
+            }
+            return (
+              <Pagination.Item
+                key={idx}
+                onClick={() => {
+                  setPage(currPage);
+                  if (idx === 7) {
+                    setLeftiesPage(base + 4);
+                    setRightiesPage(base + 4 + idx);
+                    setBase(base + 4);
+                  } else if (idx === 0 && currPage !== 1) {
+                    setLeftiesPage(base - 4);
+                    setRightiesPage(base - 4 + idx);
+                    setBase(base - 4);
+                  }
+                }}
+                active={page === currPage}
+              >
+                {currPage}
+              </Pagination.Item>
+            );
+          })}
 
-        {/* {data.characters.info.pages - rightiesPage > 1 ? (
+          {/* {data.characters.info.pages - rightiesPage > 1 ? (
           <Pagination.Next onClick={() => setPage(page + 1)} />
         ) : null} */}
-      </Pagination>
-    </Stack>
+        </Pagination>
+      </Container>
+    </div>
   );
 }
 
