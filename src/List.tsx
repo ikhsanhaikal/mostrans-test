@@ -24,6 +24,9 @@ const GET_CHARACTERS = gql`
 
 function List() {
   const [page, setPage] = useState<number>(1);
+  const [base, setBase] = useState<number>(1);
+  const [leftiesPage, setLeftiesPage] = useState<number>(1);
+  const [rightiesPage, setRightiesPage] = useState<number>(8);
   const { loading, error, data, fetchMore } = useQuery(GET_CHARACTERS, {
     variables: {
       page: 1,
@@ -32,7 +35,12 @@ function List() {
 
   useEffect(() => {
     console.log("page: ", page);
-  }, [page]);
+    fetchMore({
+      variables: {
+        page: page,
+      },
+    });
+  }, [page, fetchMore]);
 
   if (error) {
     return <>error: {error.message}</>;
@@ -59,32 +67,47 @@ function List() {
         })} */}
       </ul>
       <Pagination>
-        {page > 1 ? (
-          <Pagination.Prev onClick={() => setPage(page - 1)} />
-        ) : null}
+        {/* {page > 1 ? (
+          <Pagination.Prev
+            onClick={() => {
+              if (page === leftiesPage) {
+                setBase(base - 4);
+              }
+              setPage(page - 1);
+            }}
+          />
+        ) : null} */}
 
         {Array.from(Array(8).values()).map((_, idx) => {
+          const currPage = idx + base;
+          if (currPage > 42) {
+            return null;
+          }
           return (
             <Pagination.Item
-              key={idx + 1}
+              key={idx}
               onClick={() => {
-                setPage(idx + 1);
-                fetchMore({
-                  variables: {
-                    page: idx + 1,
-                  },
-                }).then((value) => console.log("value: ", value));
+                setPage(currPage);
+                if (idx === 7) {
+                  setLeftiesPage(base + 4);
+                  setRightiesPage(base + 4 + idx);
+                  setBase(base + 4);
+                } else if (idx === 0 && currPage !== 1) {
+                  setLeftiesPage(base - 4);
+                  setRightiesPage(base - 4 + idx);
+                  setBase(base - 4);
+                }
               }}
-              active={page === idx + 1}
+              active={page === currPage}
             >
-              {idx + 1}
+              {currPage}
             </Pagination.Item>
           );
         })}
 
-        {page < 8 ? (
+        {/* {data.characters.info.pages - rightiesPage > 1 ? (
           <Pagination.Next onClick={() => setPage(page + 1)} />
-        ) : null}
+        ) : null} */}
       </Pagination>
     </Stack>
   );
