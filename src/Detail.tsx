@@ -1,6 +1,16 @@
 import { gql, useQuery } from "@apollo/client";
-import { Col, Container, Image, Row } from "react-bootstrap";
+import { Alert, Image } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
+import { db } from "./firebase";
+import { useState } from "react";
+import {
+  arrayUnion,
+  doc,
+  FieldValue,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 
 const GET_CHARACTER_BY_ID = gql`
   query ($id: ID!) {
@@ -35,12 +45,28 @@ export default function Detail() {
     variables: { id: characterId },
   });
 
+  const [alert, setAlert] = useState<{
+    variant: string;
+    message: string;
+  } | null>(null);
+
+  const [location, setLocation] = useState("");
+
   if (loading) return "loading...";
   if (error) return "error";
 
   return (
     <div className="m-4 w-25">
-      <Link to={"/"} className="btn btn-link border mb-5">
+      {alert !== null ? (
+        <Alert
+          variant={alert.variant}
+          onClose={() => setAlert(null)}
+          dismissible
+        >
+          {alert.message}
+        </Alert>
+      ) : null}
+      <Link to={"/"} className="btn btn-link border mb-3">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
@@ -50,11 +76,11 @@ export default function Detail() {
           viewBox="0 0 16 16"
         >
           <path
-            fill-rule="evenodd"
+            fillRule="evenodd"
             d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
           />
         </svg>
-        <span className="px-2">home</span>
+        <span>home</span>
       </Link>
       <div>
         <Image
@@ -65,7 +91,55 @@ export default function Detail() {
         <h1>{data.character.name}</h1>
         <h3>species {data.character.species}</h3>
       </div>
-      <form>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          console.log("onSubmit was called");
+          try {
+            const docRef = doc(db, "assignedIds", characterId);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+              console.log("Document data:", docSnap.data());
+              setAlert({
+                message: `character \`${data.character.name}\` sudah diassign ke suatu lokasi`,
+                variant: "danger",
+              });
+              return;
+            } else {
+              const docLocation = await getDoc(
+                doc(db, "locations", location.toUpperCase())
+              );
+              if (docLocation.exists()) {
+                console.log("exist");
+                await updateDoc(docLocation.ref, {
+                  charactersIds: arrayUnion(characterId),
+                });
+              } else {
+                console.log("does not exist");
+                await setDoc(doc(db, "locations", location.toUpperCase()), {
+                  charactersIds: [characterId],
+                });
+              }
+              await setDoc(doc(db, "assignedIds", characterId), {
+                location: location,
+              });
+
+              setAlert({
+                message: `character \`${data.character.name}\` berhasil diassign ke ${location}`,
+                variant: "success",
+              });
+            }
+            setLocation("");
+          } catch (error) {
+            setAlert({
+              message: error.message,
+              variant: "danger",
+            });
+            // console.error("Error adding document: ", e);
+          }
+        }}
+      >
         <div className="mb-3">
           <label className="form-label">Assign to a location</label>
           <input
@@ -74,9 +148,17 @@ export default function Detail() {
             id="exampleInputEmail1"
             aria-describedby="emailHelp"
             placeholder="Pluto"
+            value={location}
+            onChange={(ev) => {
+              setLocation(ev.target.value);
+            }}
           />
         </div>
-        <button type="submit" className="btn btn-primary">
+        <button
+          type="submit"
+          className="btn btn-primary"
+          onClick={() => console.log("oucch")}
+        >
           Submit
         </button>
       </form>

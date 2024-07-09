@@ -59,7 +59,7 @@ function List() {
           {data.characters.results
             .filter((el) => el.id > page * 20 - 20 && el.id <= page * 20)
             .map((character) => {
-              return <CardCharacter character={character} />;
+              return <CardCharacter key={character.id} character={character} />;
             })}
         </Row>
         <Pagination>

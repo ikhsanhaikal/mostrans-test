@@ -2,8 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Detail from "./Detail.tsx";
+import List from "./List.tsx";
+import CharacterByLocation from "./CharacterByLocation.tsx";
+import Package from "./Package.tsx";
 
 const cache = new InMemoryCache({
   typePolicies: {
@@ -48,21 +51,25 @@ const client = new ApolloClient({
   cache: cache,
 });
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-  },
-  {
-    path: "characters/:characterId",
-    element: <Detail />,
-  },
-]);
-
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ApolloProvider client={client}>
-      <RouterProvider router={router}></RouterProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />}>
+            <Route index element={<List />} />
+            <Route path="characters/:characterId" element={<Detail />} />
+            <Route
+              path="characters-by-location"
+              element={<CharacterByLocation />}
+            />
+            <Route
+              path="characters-by-location/:location"
+              element={<Package />}
+            />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </ApolloProvider>
   </React.StrictMode>
 );
