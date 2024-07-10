@@ -1,6 +1,6 @@
 import { gql, useQuery } from "@apollo/client";
-import { Alert, Image } from "react-bootstrap";
-import { Link, useParams } from "react-router-dom";
+import { Alert, Button, Image } from "react-bootstrap";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { db } from "./firebase";
 import { useEffect, useState } from "react";
 import {
@@ -54,6 +54,8 @@ export default function Detail() {
   const [location, setLocation] = useState("");
   const [assignedLocation, setAssignedLocation] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     (async () => {
       const docSnap = await getDoc(doc(db, "assignedIds", characterId));
@@ -78,7 +80,7 @@ export default function Detail() {
           {alert.message}
         </Alert>
       ) : null}
-      <Link to={"/"} className="btn btn-link border mb-3">
+      <Button onClick={() => navigate(-1)} className="btn btn-link border mb-3">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
@@ -92,8 +94,8 @@ export default function Detail() {
             d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
           />
         </svg>
-        <span>home</span>
-      </Link>
+        <span className="mx-2">back</span>
+      </Button>
       {assignedLocation !== null ? (
         <span className="badge text-bg-info my-3">
           was assigned to {assignedLocation}

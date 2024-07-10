@@ -27,8 +27,8 @@ const GET_CHARACTERS = gql`
 function List() {
   const [page, setPage] = useState<number>(1);
   const [base, setBase] = useState<number>(1);
-  const [leftiesPage, setLeftiesPage] = useState<number>(1);
-  const [rightiesPage, setRightiesPage] = useState<number>(8);
+  // const [leftiesPage, setLeftiesPage] = useState<number>(1);
+  // const [rightiesPage, setRightiesPage] = useState<number>(8);
   const { loading, error, data, fetchMore } = useQuery(GET_CHARACTERS, {
     variables: {
       page: 1,

@@ -26,20 +26,24 @@ export default function Package() {
   }
   // console.log("data: ", data);
 
+  if (error) {
+    return <h3>error {error.message}</h3>;
+  }
+
   return (
-    <>
-      <h1>{location}</h1>
+    <div className="m-4">
+      <h3>{location}</h3>
       <ul>
         {data.charactersByIds.map((c) => {
           return (
             <Link key={c.id} to={`/characters/${c.id}`}>
               <div>
-                <h3> {c.name} </h3>
+                <h5> {c.name} </h5>
               </div>
             </Link>
           );
         })}
       </ul>
-    </>
+    </div>
   );
 }
