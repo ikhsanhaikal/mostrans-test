@@ -2,11 +2,12 @@ import { gql, useQuery } from "@apollo/client";
 import { Alert, Image } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import { db } from "./firebase";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  arrayRemove,
   arrayUnion,
+  deleteDoc,
   doc,
-  FieldValue,
   getDoc,
   setDoc,
   updateDoc,
@@ -51,6 +52,17 @@ export default function Detail() {
   } | null>(null);
 
   const [location, setLocation] = useState("");
+  const [assignedLocation, setAssignedLocation] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const docSnap = await getDoc(doc(db, "assignedIds", characterId));
+      if (docSnap.exists()) {
+        console.log("assignedLocation: ", docSnap.data());
+        setAssignedLocation(docSnap.data().location);
+      }
+    })();
+  }, []);
 
   if (loading) return "loading...";
   if (error) return "error";
@@ -82,6 +94,12 @@ export default function Detail() {
         </svg>
         <span>home</span>
       </Link>
+      {assignedLocation !== null ? (
+        <span className="badge text-bg-info my-3">
+          was assigned to {assignedLocation}
+        </span>
+      ) : null}
+
       <div>
         <Image
           src={data.character.image}
@@ -162,6 +180,32 @@ export default function Detail() {
           Submit
         </button>
       </form>
+      <div className="py-2">
+        {assignedLocation ? (
+          <button
+            className="btn btn-danger mt-0"
+            onClick={async () => {
+              try {
+                await deleteDoc(doc(db, "assignedIds", characterId));
+                await updateDoc(
+                  doc(db, "locations", assignedLocation.toUpperCase()),
+                  {
+                    charactersIds: arrayRemove(characterId),
+                  }
+                );
+                setAssignedLocation(null);
+              } catch (error) {
+                setAlert({
+                  message: error.message,
+                  variant: "danger",
+                });
+              }
+            }}
+          >
+            Release it
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }

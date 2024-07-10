@@ -14,7 +14,7 @@ const GET_MULTIPLE_CHARACTERS = gql`
 export default function Package() {
   const { location } = useParams();
   const { state } = useLocation();
-  console.log("ids: ", state.ids);
+  // console.log("ids: ", state.ids);
   const { loading, error, data } = useQuery(GET_MULTIPLE_CHARACTERS, {
     variables: {
       ids: state.ids,
@@ -24,7 +24,7 @@ export default function Package() {
   if (loading) {
     return <h3>loading for characters with location {location}</h3>;
   }
-  console.log("data: ", data);
+  // console.log("data: ", data);
 
   return (
     <>

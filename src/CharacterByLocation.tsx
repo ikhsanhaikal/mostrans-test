@@ -1,13 +1,11 @@
 import {
   collection,
-  doc,
   DocumentData,
   getDocs,
   QuerySnapshot,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { useEffect, useState } from "react";
-import Package from "./Package";
 import { Link } from "react-router-dom";
 
 export default function CharactersByLocation() {
@@ -20,10 +18,10 @@ export default function CharactersByLocation() {
     (async function () {
       const querySnapshot = await getDocs(collection(db, "locations"));
       setSnapshot(querySnapshot);
-      querySnapshot.forEach((doc) => {
-        console.log("doc index: ", doc.id);
-        console.log("doc: ", doc.data());
-      });
+      // querySnapshot.forEach((doc) => {
+      //   console.log("doc index: ", doc.id);
+      //   console.log("doc: ", doc.data());
+      // });
     })();
   }, []);
 
@@ -36,7 +34,7 @@ export default function CharactersByLocation() {
       <ul>
         {snapshot?.docs.map((doc) => {
           // console.log("data: ", doc.data().charactersIds);
-          return (
+          return doc.data().charactersIds.length > 0 ? (
             <Link
               key={doc.id}
               to={`${doc.id}`}
@@ -45,7 +43,7 @@ export default function CharactersByLocation() {
             >
               {doc.id}
             </Link>
-          );
+          ) : null;
         })}
       </ul>
     </>
